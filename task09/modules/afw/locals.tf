@@ -49,9 +49,10 @@ locals {
   application_rules = [
     {
       name             = "fqdn-http"
+      priority         = 100
       source_addresses = ["*"]
       target_fqdns     = ["*.azmk8s.io"]
-
+      fqdn_tags        = []
       protocol = {
         type = "Http"
         port = 80
@@ -59,9 +60,10 @@ locals {
     },
     {
       name             = "fqdn-https"
+      priority         = 200
       source_addresses = ["*"]
       target_fqdns     = ["*.azmk8s.io"]
-
+      fqdn_tags        = []
       protocol = {
         type = "Https"
         port = 443

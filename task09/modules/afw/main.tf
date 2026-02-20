@@ -65,17 +65,21 @@ resource "azurerm_firewall_application_rule_collection" "firewall_app_rules" {
   name                = each.value.name
   azure_firewall_name = azurerm_firewall.afw.name
   resource_group_name = var.resource_group_name
-  priority            = 100
+  priority            = each.value.priority
   action              = "Allow"
 
   rule {
     name             = each.value.name
     source_addresses = each.value.source_addresses
-    target_fqdns     = each.value.target_fqdns
+    target_fqdns     = length(lookup(each.value, "target_fqdns", [])) > 0 ? each.value.target_fqdns : null
+    fqdn_tags        = length(lookup(each.value, "fqdn_tags", [])) > 0 ? each.value.fqdn_tags : null
 
-    protocol {
-      type = each.value.protocol.type
-      port = each.value.protocol.port
+    dynamic "protocol" {
+      for_each = length(lookup(each.value, "protocol", {})) > 0 ? [each.value.protocol] : []
+      content {
+        type = protocol.value.type
+        port = protocol.value.port
+      }
     }
   }
 }
