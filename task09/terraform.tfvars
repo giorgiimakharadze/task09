@@ -5,7 +5,7 @@ firewall_subnet_address_prefix = ["10.0.1.0/26"]
 firewall_sku_tier              = "Standard"
 public_ip_sku                  = "Standard"
 route_1_address_prefix         = "0.0.0.0/0"
-aks_loadbalancer_ip            = "20.85.134.49"
+aks_loadbalancer_ip            = "20.237.0.187"
 nsg_rule_name                  = "AllowAccessFromFirewallPublicIPToLoadBalancerIP"
 nsg_rule_priority              = 400
 
