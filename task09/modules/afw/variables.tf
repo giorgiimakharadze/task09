@@ -92,3 +92,13 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
 }
+
+variable "app_rule_http_name" {
+  description = "Name of the HTTP application rule collection"
+  type        = string
+}
+
+variable "app_rule_https_name" {
+  description = "Name of the HTTPS application rule collection"
+  type        = string
+}

@@ -39,6 +39,8 @@ module "afw" {
   net_rule_collection_name       = var.net_rule_collection_name
   nat_rule_collection_name       = var.nat_rule_collection_name
   tags                           = var.tags
+  app_rule_http_name             = var.app_rule_http_name
+  app_rule_https_name            = var.app_rule_https_name
 }
 
 resource "azurerm_network_security_rule" "allow_firewall_to_lb" {

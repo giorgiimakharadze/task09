@@ -48,7 +48,7 @@ locals {
 
   application_rules = [
     {
-      name             = "fqdn-http"
+      name             = var.app_rule_http_name
       priority         = 100
       source_addresses = ["*"]
       target_fqdns     = ["*.azmk8s.io"]
@@ -59,7 +59,7 @@ locals {
       }
     },
     {
-      name             = "fqdn-https"
+      name             = var.app_rule_https_name
       priority         = 200
       source_addresses = ["*"]
       target_fqdns     = ["*.azmk8s.io"]

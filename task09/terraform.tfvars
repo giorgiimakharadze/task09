@@ -9,6 +9,8 @@ app_rule_collection_name       = "aksfwar"
 net_rule_collection_name       = "aksfwnr"
 nat_rule_collection_name       = "aksfwnatr"
 nsg_rule_priority              = 400
+app_rule_http_name             = "fqdn-http"
+app_rule_https_name            = "fqdn-https"
 
 tags = {
   Creator = "Giorgi Makharadze"
