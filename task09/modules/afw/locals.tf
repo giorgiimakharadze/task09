@@ -3,67 +3,69 @@ locals {
 
   network_rules = [
     {
-      name                  = "AllowNTP"
-      source_addresses      = ["*"]
-      destination_ports     = ["123"]
-      destination_addresses = ["*"]
-      destination_fqdns     = []
-      protocols             = ["UDP"]
-    },
-    {
       name                  = "apitcp"
       source_addresses      = ["*"]
       destination_ports     = ["9000"]
-      destination_addresses = ["AzureCloud.eastus"]
-      destination_fqdns     = []
+      destination_addresses = ["AzureCloud.${var.location}"]
       protocols             = ["TCP"]
     },
     {
       name                  = "apiudp"
       source_addresses      = ["*"]
       destination_ports     = ["1194"]
-      destination_addresses = ["AzureCloud.eastus"]
-      destination_fqdns     = []
+      destination_addresses = ["AzureCloud.${var.location}"]
       protocols             = ["UDP"]
     },
     {
-      name                  = "allow-http-inbound"
-      source_addresses      = ["*"]
-      destination_ports     = ["80"]
-      destination_addresses = ["*"]
-      destination_fqdns     = []
-      protocols             = ["TCP"]
+      name              = "time"
+      source_addresses  = ["*"]
+      destination_ports = ["123"]
+      destination_fqdns = ["ntp.ubuntu.com"]
+      protocols         = ["UDP"]
+    },
+    {
+      name              = "ghcr"
+      source_addresses  = ["*"]
+      destination_ports = ["443"]
+      destination_fqdns = [
+        "ghcr.io",
+        "pkg-containers.githubusercontent.com"
+      ]
+      protocols = ["TCP"]
+    },
+    {
+      name              = "docker"
+      source_addresses  = ["*"]
+      destination_ports = ["443"]
+      destination_fqdns = [
+        "docker.io",
+        "registry-1.docker.io",
+        "production.cloudflare.docker.com"
+      ]
+      protocols = ["TCP"]
     }
   ]
 
   application_rules = [
     {
-      name             = "AllowContainerRegistry"
+      name             = "fqdn-http"
       source_addresses = ["*"]
-      target_fqdns     = ["mcr.microsoft.com", "*.data.mcr.microsoft.com", "*.azurecr.io", "docker.io", "registry-1.docker.io", "production.cloudflare.docker.com"]
-      fqdn_tags        = []
-      protocol         = { port = 443, type = "Https" }
+      target_fqdns     = ["*.azmk8s.io"]
+
+      protocol = {
+        type = "Http"
+        port = 80
+      }
     },
     {
-      name             = "AllowGoogleNginx"
+      name             = "fqdn-https"
       source_addresses = ["*"]
-      target_fqdns     = ["www.google.com", "*.nginx.org"]
-      fqdn_tags        = []
-      protocol         = { port = 443, type = "Https" }
-    },
-    {
-      name             = "aks-required"
-      source_addresses = ["*"]
-      fqdn_tags        = ["AzureKubernetesService"]
-      target_fqdns     = []
-      protocol         = {}
-    },
-    {
-      name             = "allow-http"
-      source_addresses = ["*"]
-      fqdn_tags        = []
-      target_fqdns     = ["*"]
-      protocol         = { port = 80, type = "Http" }
+      target_fqdns     = ["*.azmk8s.io"]
+
+      protocol = {
+        type = "Https"
+        port = 443
+      }
     }
   ]
 
