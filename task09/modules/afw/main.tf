@@ -65,39 +65,30 @@ resource "azurerm_firewall_application_rule_collection" "firewall_app_rules" {
   name                = each.value.name
   azure_firewall_name = azurerm_firewall.afw.name
   resource_group_name = var.resource_group_name
-  priority            = each.value.priority
-  action              = each.value.action
+  priority            = 100
+  action              = "Allow"
 
-  dynamic "rule" {
-    for_each = each.value.rules
-    content {
-      name             = rule.value.name
-      source_addresses = rule.value.source_addresses
-      target_fqdns     = length(lookup(rule.value, "target_fqdns", [])) > 0 ? rule.value.target_fqdns : null
-      fqdn_tags        = length(lookup(rule.value, "fqdn_tags", [])) > 0 ? rule.value.fqdn_tags : null
+  rule {
+    name             = each.value.name
+    source_addresses = each.value.source_addresses
+    target_fqdns     = each.value.target_fqdns
 
-      dynamic "protocol" {
-        for_each = length(lookup(rule.value, "protocols", [])) > 0 ? rule.value.protocols : []
-        content {
-          type = protocol.value.type
-          port = protocol.value.port
-        }
-      }
+    protocol {
+      type = each.value.protocol.type
+      port = each.value.protocol.port
     }
   }
 }
 
 resource "azurerm_firewall_network_rule_collection" "firewall_network_rules" {
-  for_each = { for rc in local.network_rules : rc.name => rc }
-
-  name                = each.value.name
+  name                = var.net_rule_collection_name
   azure_firewall_name = azurerm_firewall.afw.name
   resource_group_name = var.resource_group_name
-  priority            = each.value.priority
-  action              = each.value.action
+  priority            = 200
+  action              = "Allow"
 
   dynamic "rule" {
-    for_each = each.value.rules
+    for_each = local.network_rules
     content {
       name                  = rule.value.name
       source_addresses      = rule.value.source_addresses
@@ -110,16 +101,14 @@ resource "azurerm_firewall_network_rule_collection" "firewall_network_rules" {
 }
 
 resource "azurerm_firewall_nat_rule_collection" "firewall_nat_rules" {
-  for_each = { for rc in local.nat_rules : rc.name => rc }
-
-  name                = each.value.name
+  name                = var.nat_rule_collection_name
   azure_firewall_name = azurerm_firewall.afw.name
   resource_group_name = var.resource_group_name
-  priority            = each.value.priority
-  action              = each.value.action
+  priority            = 100
+  action              = "Dnat"
 
   dynamic "rule" {
-    for_each = each.value.rules
+    for_each = local.nat_rules
     content {
       name                  = rule.value.name
       source_addresses      = rule.value.source_addresses

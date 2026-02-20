@@ -33,17 +33,27 @@ variable "aks_loadbalancer_ip" {
   type        = string
 }
 
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
+variable "app_rule_collection_name" {
+  description = "Name of the application rule collection"
+  type        = string
 }
 
-variable "nsg_rule_name" {
-  description = "Name of the NSG rule"
+variable "net_rule_collection_name" {
+  description = "Name of the network rule collection"
+  type        = string
+}
+
+variable "nat_rule_collection_name" {
+  description = "Name of the NAT rule collection"
   type        = string
 }
 
 variable "nsg_rule_priority" {
   description = "Priority of the NSG rule"
   type        = number
+}
+
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
 }

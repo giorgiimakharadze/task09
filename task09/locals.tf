@@ -7,4 +7,5 @@ locals {
   route_table_name    = "${var.project_base_name}-rt"
   route_1_name        = "${var.project_base_name}-route-1"
   route_2_name        = "${var.project_base_name}-route-2"
+  nsg_rule_name       = "AllowAccessFromFirewallPublicIPToLoadBalancerIP"
 }

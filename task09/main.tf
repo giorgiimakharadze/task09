@@ -2,7 +2,7 @@ data "azurerm_resource_group" "rg" {
   name = local.resource_group_name
 }
 
-data "azurerm_subnet" "aks_subnet" {
+data "azurerm_subnet" "aks" {
   name                 = var.aks_subnet_name
   virtual_network_name = local.vnet_name
   resource_group_name  = local.resource_group_name
@@ -33,13 +33,16 @@ module "afw" {
   route_1_name                   = local.route_1_name
   route_1_address_prefix         = var.route_1_address_prefix
   route_2_name                   = local.route_2_name
-  aks_subnet_id                  = data.azurerm_subnet.aks_subnet.id
+  aks_subnet_id                  = data.azurerm_subnet.aks.id
   aks_loadbalancer_ip            = var.aks_loadbalancer_ip
+  app_rule_collection_name       = var.app_rule_collection_name
+  net_rule_collection_name       = var.net_rule_collection_name
+  nat_rule_collection_name       = var.nat_rule_collection_name
   tags                           = var.tags
 }
 
 resource "azurerm_network_security_rule" "allow_firewall_to_lb" {
-  name                        = var.nsg_rule_name
+  name                        = local.nsg_rule_name
   priority                    = var.nsg_rule_priority
   direction                   = "Inbound"
   access                      = "Allow"

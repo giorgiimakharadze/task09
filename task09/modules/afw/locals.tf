@@ -1,105 +1,80 @@
 locals {
   firewall_public_ip = azurerm_public_ip.pip.ip_address
 
-  nat_rules = [
-    {
-      name     = "aksfwnatr"
-      priority = 100
-      action   = "Dnat"
-      rules = [
-        {
-          name               = "inboundrule"
-          source_addresses   = ["*"]
-          destination_ports  = ["80"]
-          translated_address = var.aks_loadbalancer_ip
-          translated_port    = "80"
-          protocols          = ["Any"]
-        }
-      ]
-    }
-  ]
-
   network_rules = [
     {
-      name     = "aksfwnr"
-      priority = 100
-      action   = "Allow"
-      rules = [
-        {
-          name                  = "apitcp"
-          protocols             = ["TCP"]
-          source_addresses      = ["*"]
-          destination_addresses = ["AzureCloud.eastus"]
-          destination_fqdns     = []
-          destination_ports     = ["9000"]
-        },
-        {
-          name                  = "apiudp"
-          protocols             = ["UDP"]
-          source_addresses      = ["*"]
-          destination_addresses = ["AzureCloud.eastus"]
-          destination_fqdns     = []
-          destination_ports     = ["1194"]
-        },
-        {
-          name                  = "time"
-          protocols             = ["UDP"]
-          source_addresses      = ["*"]
-          destination_addresses = []
-          destination_fqdns     = ["ntp.ubuntu.com"]
-          destination_ports     = ["123"]
-        },
-        {
-          name                  = "ghcr"
-          protocols             = ["TCP"]
-          source_addresses      = ["*"]
-          destination_addresses = []
-          destination_fqdns     = ["ghcr.io", "pkg-containers.githubusercontent.com"]
-          destination_ports     = ["443"]
-        },
-        {
-          name                  = "docker"
-          protocols             = ["TCP"]
-          source_addresses      = ["*"]
-          destination_addresses = []
-          destination_fqdns     = ["docker.io", "registry-1.docker.io", "production.cloudflare.docker.com"]
-          destination_ports     = ["443"]
-        },
-        {
-          name                  = "allow-http-inbound"
-          protocols             = ["TCP"]
-          source_addresses      = ["*"]
-          destination_addresses = ["*"]
-          destination_fqdns     = []
-          destination_ports     = ["80"]
-        }
-      ]
+      name                  = "AllowNTP"
+      source_addresses      = ["*"]
+      destination_ports     = ["123"]
+      destination_addresses = ["*"]
+      destination_fqdns     = []
+      protocols             = ["UDP"]
+    },
+    {
+      name                  = "apitcp"
+      source_addresses      = ["*"]
+      destination_ports     = ["9000"]
+      destination_addresses = ["AzureCloud.eastus"]
+      destination_fqdns     = []
+      protocols             = ["TCP"]
+    },
+    {
+      name                  = "apiudp"
+      source_addresses      = ["*"]
+      destination_ports     = ["1194"]
+      destination_addresses = ["AzureCloud.eastus"]
+      destination_fqdns     = []
+      protocols             = ["UDP"]
+    },
+    {
+      name                  = "allow-http-inbound"
+      source_addresses      = ["*"]
+      destination_ports     = ["80"]
+      destination_addresses = ["*"]
+      destination_fqdns     = []
+      protocols             = ["TCP"]
     }
   ]
 
   application_rules = [
     {
-      name     = "aksfwar"
-      priority = 100
-      action   = "Allow"
-      rules = [
-        {
-          name             = "aks-required"
-          source_addresses = ["*"]
-          fqdn_tags        = ["AzureKubernetesService"]
-          target_fqdns     = []
-          protocols        = []
-        },
-        {
-          name             = "allow-http"
-          source_addresses = ["*"]
-          fqdn_tags        = []
-          target_fqdns     = ["*"]
-          protocols = [
-            { type = "Http", port = 80 }
-          ]
-        }
-      ]
+      name             = "AllowContainerRegistry"
+      source_addresses = ["*"]
+      target_fqdns     = ["mcr.microsoft.com", "*.data.mcr.microsoft.com", "*.azurecr.io", "docker.io", "registry-1.docker.io", "production.cloudflare.docker.com"]
+      fqdn_tags        = []
+      protocol         = { port = 443, type = "Https" }
+    },
+    {
+      name             = "AllowGoogleNginx"
+      source_addresses = ["*"]
+      target_fqdns     = ["www.google.com", "*.nginx.org"]
+      fqdn_tags        = []
+      protocol         = { port = 443, type = "Https" }
+    },
+    {
+      name             = "aks-required"
+      source_addresses = ["*"]
+      fqdn_tags        = ["AzureKubernetesService"]
+      target_fqdns     = []
+      protocol         = {}
+    },
+    {
+      name             = "allow-http"
+      source_addresses = ["*"]
+      fqdn_tags        = []
+      target_fqdns     = ["*"]
+      protocol         = { port = 80, type = "Http" }
     }
   ]
+
+  nat_rules = var.aks_loadbalancer_ip != "" ? [
+    {
+      name               = "DNAT-NGINX"
+      source_addresses   = ["*"]
+      destination_ports  = ["80"]
+      protocols          = ["TCP"]
+      translated_address = var.aks_loadbalancer_ip
+      translated_port    = "80"
+    }
+  ] : []
 }
